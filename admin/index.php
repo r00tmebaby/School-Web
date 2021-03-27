@@ -63,15 +63,18 @@ if (!isset($_SESSION['admin'])) {
 						<p><input type="submit"  name="login" value="Влез"></p>
 					</form>';
     if (isset($_POST['login'])) {
+        $ip = $_SERVER["REMOTE_ADDR"];
         if (in_array(null, array($_POST['username'], $_POST['password']))) {
             showMessage("Празни полета!", "Моля, попълните всички полета.", "danger");
         } elseif (!only_numbers_and_letters(array($_POST['username'], $_POST['password']), "en")) {
             showMessage("Невалидни данни!", "Моля, въведете само цифри и букви от английската азбука.", "danger");
+        } elseif (isLoginBlocked()) { showMessage("Прекалено много неуспешни опита за вход!","Моля, опитайте отново след 10 минути.","danger");
         } else {
             if (isAccount($_POST['username'], $_POST['password'])) {
                 $_SESSION['admin'] = $_POST['username'];
                 echo "<meta http-equiv='refresh' content='0'>";
             } else {
+                failLoginIpSave(); // Save the IP of the USER
                 showMessage("Невалидни данни!", "Въвели сте грешно потребителско име или парола.", "danger");
             }
         }

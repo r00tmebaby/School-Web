@@ -309,3 +309,28 @@ function checkID($table, $id)
     return in_array($id, $data);
 }
 
+function failLoginIpSave()
+{
+    mysqli_query(isDbConnected(), "INSERT INTO `ip` (`ip_adress` ,`time`) VALUES ('".takeIP()."',CURRENT_TIMESTAMP)");
+}
+
+function isLoginBlocked()
+{
+    $result = mysqli_query(isDbConnected(), "SELECT COUNT(*) FROM `ip` WHERE `ip_adress` LIKE '".takeIP()."' AND `time` > (now() - interval 10 minute)");
+    $count = mysqli_fetch_array($result, MYSQLI_NUM);
+    return ($count[0] >= 3) ? true : false;
+}
+
+function takeIP()
+{
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    } else {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    return $ip;
+}
+
+
